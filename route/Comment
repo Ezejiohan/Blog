@@ -1,0 +1,20 @@
+const express = require("express");
+const { createComment, 
+    editComment, 
+    commentPool, 
+    retrieveComment, 
+    terminateComment } = require("../Controller/comment");
+const { authenticate } = require("../middlewear/authenticate");
+
+const Comment = express.Router();
+Comment.get("/", (req, res) => {
+    res.send("Blog Database");
+});
+
+Comment.post("./api/createComment", authenticate, createComment);
+Comment.put("./api/editComment/:id", authenticate, editComment);
+Comment.get("./api/commentPool/:postId", authenticate, commentPool);
+Comment.get("./api/retrieveComment/:id", authenticate, retrieveComment);
+Comment.delete("./api/terminateComment/:userId", authenticate, terminateComment);
+
+module.exports = { Comment }

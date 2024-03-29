@@ -1,0 +1,25 @@
+const express = require("express");
+const { 
+    registerUsers, 
+    loginUsers, 
+    updateUsername, 
+    retrieveUser, 
+    userPool, 
+    deactivateUsers,
+
+} = require("../Controller/user");
+const { authenticate } = require("../middlewear/authenticate");
+
+const route = express.Router();
+route.get("/", (req, res) => {
+    res.send("Blog Database");
+});
+
+route.post("/api/registerUsers", authenticate, registerUsers);
+route.post("/api/loginUsers", loginUsers);
+route.put("/api/updateUsername/:id", authenticate, updateUsername);
+route.get("/api/retrieveUser/:username", authenticate, retrieveUser);
+route.get("/api/userPool", authenticate, userPool);
+route.delete("/api/deactivateUsers/:username", authenticate, deactivateUsers)
+
+module.exports = { route }

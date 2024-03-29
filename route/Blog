@@ -1,0 +1,23 @@
+const express = require("express");
+const  {
+    createPost, 
+    editPost,
+    postPool,
+    retrievePost,
+    terminatePost,
+
+} = require("../Controller/Blog");
+const { authenticate } = require('../middlewear/authenticate');
+
+const Blog = express.Router();
+Blog.get("/", (req, res) => {
+    res.send("Blog Database");
+});
+
+Blog.post("/api/createPost", authenticate, createPost);
+Blog.put("/api/editPost/:id", authenticate, editPost);
+Blog.get("/api/postPool", authenticate, postPool);
+Blog.get("/api/retrievePost/:id", authenticate, retrievePost);
+Blog.delete("/api/terminatePost/:id", authenticate, terminatePost);
+
+module.exports ={ Blog }
