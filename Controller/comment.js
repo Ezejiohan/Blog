@@ -6,21 +6,22 @@ const UserModel = require("../models/User");
 
 const createComment = async (req, res) => {
     try {
-        const user = req.user;
-        if (!user) {
+        
+        if (!req.user) {
             return res.status(401).json({
                 status: "Failed",
-                message: "You must be Loggedin to comment"
+                message: "You must be logged in to comment"
             });
         } 
         const commentData = {
             content: req.body.content,
-            post: req.body.post
+            post: req.body.post,
+            comment: req.body.comment
         }
 
         const newComment = await CommentModel.create({
             commentData,
-            user: req.user._id
+            author: req.user._id
         });
 
         await newComment.save();
@@ -40,7 +41,7 @@ const createComment = async (req, res) => {
 const editComment = async (req, res) => {
     try {
 
-        if (!user) {
+        if (!req.user) {
             return res.status(401).json({
                 status: "Failed",
                 message: "You must be logged in to edit a comment"
@@ -54,15 +55,15 @@ const editComment = async (req, res) => {
                 message: "Comment not found"
             });
         }
-        const user = req.user;
-        if (comment.user === true) {
+        const author = req.user;
+        if (comment.author === true) {
             return res.status(403).json({
                 status: "Failed",
                 message: "You are not authorized to edit this comment"
             });
         } else {
             const commentData = {
-                content: req.body.content
+                comment: req.body.comment
             }
             const editedComment = await CommentModel.findByIdAndUpdate(id, commentData, { new: true });
             res.status(200).json({
@@ -83,7 +84,7 @@ const editComment = async (req, res) => {
 
 const commentPool = async (req, res) => {
     try {
-        if (!user) {
+        if (!req.user) {
             return res.status(401).json({
                 status: "Failed",
                 message: "You must be logged in to edit a comment"
