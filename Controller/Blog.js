@@ -5,16 +5,18 @@ const UserModel = require("../models/User");
 
 const createPost = async (req, res) => {
     try {
-        const { title, content, author } = req.body;
+        const author = req.user;
+        const { title, content } = req.body;
 
-        const postExist = await BlogPostModel.findOne({ title });
+        const id = req.params.id;
+        const postExist = await BlogPostModel.findOne({ id });
         if (postExist) {
             return res.status(403).json({
                 message: "Post already exists"
             });
         }
 
-        const newPost = await BlogPostModel.create({ title, content, author });
+        const newPost = await BlogPostModel.create({ title, content, author: author.id });
         
         res.status(201).json({
             message: "Post created successfully",
@@ -49,11 +51,12 @@ const editPost = async (req, res) => {
             }
             const editedPost = await BlogPostModel.findByIdAndUpdate(id, postData, { new: true });
             res.status(200).json({
+                status: "Success",
                 message: "Post edited Successful",
                 data: editedPost
             });
             await post.save();
-
+        
             res.status(201).json(post)
         }
     } catch (error) {

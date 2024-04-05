@@ -6,41 +6,45 @@ const UserModel = require("../models/User");
 
 const createComment = async (req, res) => {
     try {
-        
+        const author = req.user;
         if (!req.user) {
             return res.status(401).json({
                 status: "Failed",
-                message: "You must be logged in to comment"
+                message: "You are not logged in"
             });
-        } 
-        const commentData = {
-            content: req.body.content,
-            post: req.body.post,
-            comment: req.body.comment
         }
-
-        const newComment = await CommentModel.create({
-            commentData,
-            author: req.user._id
-        });
-
-        await newComment.save();
-        res.status(201).json({
-            status: "Success",
-            message: "Comment created Successfully",
-            data: newComment
-        })
+        const postId = req.params.postId;
+        const post = await BlogPostModel.findById(postId);
+        if (!post) {
+            return res.status(404).json({
+                status: "Failed",
+                message: "Post not found"
+            });
+        } else {
+            const commentData = {
+                content: req.body.content,
+                comment: req.body.comment,
+                post: post._id,
+                author: req.user.id
+            }
+            
+            const newComment = await CommentModel.create(commentData);
+            res.status(201).json({
+                status: "Success",
+                message: "Comment created Successfully",
+                data: newComment
+            });
+        }    
     } catch (error) {
         res.status(500).json({
             status: "Failed",
-            message: "error.message"
+            message: error.message
         });
     }
 };
 
 const editComment = async (req, res) => {
     try {
-
         if (!req.user) {
             return res.status(401).json({
                 status: "Failed",
@@ -77,7 +81,7 @@ const editComment = async (req, res) => {
     } catch (error) {
         res.status(500).json({
             status: "Failed",
-            message: "error.message"
+            message: error.message
         });
     }
 };
@@ -87,27 +91,40 @@ const commentPool = async (req, res) => {
         if (!req.user) {
             return res.status(401).json({
                 status: "Failed",
-                message: "You must be logged in to edit a comment"
+                message: "You are not logged in"
             });
         }
         const postId = req.params.postId;
-        const comments = await CommentModel.find({ post: postId});
-        res.status(200).json({
-            status: "Success",
-            message: "Comments retrieved Successfully",
-            data: comments
-        }) ;   
-        
+        const post = await BlogPostModel.findById(postId);
+        if (!post) {
+            res.status(404).json({
+                status: "Failed",
+                message: "Post not found"
+            }); 
+        } else {     
+            const commentPool = await CommentModel.find({ post: postId}).limit(5);
+            res.status(200).json({
+                status: "Success",
+                numberOfComment: commentPool.length,
+                data: commentPool
+            });
+        }   
     } catch (error) {
         res.status(500).json({
             status: "Failed",
-            message: "error.message"
+            message: error.message
         });
     }
 };
 
 const retrieveComment = async (req, res) => {
     try {
+        if (!req.user) {
+            return res.status(401).json({
+                status: "Failed",
+                message: "You are not logged in"
+            });
+        }    
         const id = req.params.id;
         const comment = await CommentModel.findById(id);
         if (!comment) {
@@ -120,12 +137,12 @@ const retrieveComment = async (req, res) => {
                 status: "Success",
                 message: "Comment retrieved Successfully",
                 data: comment
-            })
+            });
         }
     } catch (error) {
         res.status(500).json({
             status: "Failed",
-            message: "error.message"
+            message: error.message
         });
     }
 };
@@ -156,7 +173,7 @@ const terminateComment = async (req, res) => {
     } catch (error) {
         res.status(500).json({
             status: "Failed",
-            message: "error.message"
+            message: error.message
         });
     }
 };
