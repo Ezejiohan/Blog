@@ -1,18 +1,9 @@
 const CommentModel = require("../models/Comments");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 const BlogPostModel = require("../models/Blogs");
-const UserModel = require("../models/User");
+const asyncWrapper = require("../middleware/async")
 
-const createComment = async (req, res) => {
-    try {
-        const author = req.user;
-        if (!req.user) {
-            return res.status(401).json({
-                status: "Failed",
-                message: "You are not logged in"
-            });
-        }
+
+const createComment = asyncWrapper(async (req, res) => {    
         const postId = req.params.postId;
         const post = await BlogPostModel.findById(postId);
         if (!post) {
@@ -35,22 +26,11 @@ const createComment = async (req, res) => {
                 data: newComment
             });
         }    
-    } catch (error) {
-        res.status(500).json({
-            status: "Failed",
-            message: error.message
-        });
-    }
-};
+   
+});
 
-const editComment = async (req, res) => {
-    try {
-        if (!req.user) {
-            return res.status(401).json({
-                status: "Failed",
-                message: "You must be logged in to edit a comment"
-            });
-        }
+const editComment = asyncWrapper(async (req, res) => {
+    
         const id = req.params.id;
         const comment = await CommentModel.findById(id);
         if (!comment) {
@@ -76,24 +56,11 @@ const editComment = async (req, res) => {
                 data: editedComment
             });
             await comment.save();
-        }
+        }   
+});
 
-    } catch (error) {
-        res.status(500).json({
-            status: "Failed",
-            message: error.message
-        });
-    }
-};
-
-const commentPool = async (req, res) => {
-    try {
-        if (!req.user) {
-            return res.status(401).json({
-                status: "Failed",
-                message: "You are not logged in"
-            });
-        }
+const commentPool = asyncWrapper(async (req, res) => {
+    
         const postId = req.params.postId;
         const post = await BlogPostModel.findById(postId);
         if (!post) {
@@ -109,24 +76,11 @@ const commentPool = async (req, res) => {
                 data: commentPool
             });
         }   
-    } catch (error) {
-        res.status(500).json({
-            status: "Failed",
-            message: error.message
-        });
-    }
-};
+});
 
-const retrieveComment = async (req, res) => {
-    try {
-        if (!req.user) {
-            return res.status(401).json({
-                status: "Failed",
-                message: "You are not logged in"
-            });
-        }    
-        const id = req.params.id;
-        const comment = await CommentModel.findById(id);
+const retrieveComment = asyncWrapper(async (req, res) => {
+        const commentId = req.params.commentId;
+        const comment = await CommentModel.findById(commentId);
         if (!comment) {
             return res.status(404).json({
                 status: "Failed",
@@ -139,16 +93,9 @@ const retrieveComment = async (req, res) => {
                 data: comment
             });
         }
-    } catch (error) {
-        res.status(500).json({
-            status: "Failed",
-            message: error.message
-        });
-    }
-};
+});
 
-const terminateComment = async (req, res) => {
-    try {
+const terminateComment = asyncWrapper(async (req, res) => {
         const id = req.params.id;
         const comment = await CommentModel.findById(id);
         if (!comment) {
@@ -170,12 +117,6 @@ const terminateComment = async (req, res) => {
                 message: "Comment deleted Successfully"
             });
         }
-    } catch (error) {
-        res.status(500).json({
-            status: "Failed",
-            message: error.message
-        });
-    }
-};
+});
 
 module.exports = { createComment, editComment, commentPool, retrieveComment, terminateComment }
